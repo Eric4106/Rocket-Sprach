@@ -1,0 +1,18 @@
+* {
+  background-color: #1c1c1c;
+  color: #ddd;
+  margin: auto;
+  margin-top: 1em;
+}
+canvas {
+  display: block;
+}
+#buttons {
+  width: 38%;
+  margin: auto;
+}
+button {
+  height: 2em;
+  margin: 5px;
+  margin-right: 1em;
+}
