@@ -6,7 +6,7 @@ let oldCount;
 let flash;
 let debug;
 let launched;
-const TEMPO = 60000 / 160
+const TEMPO = 60000 / 172
 //const TEMPO = 348.83720930232556;
 
 let osc;
