@@ -1,4 +1,5 @@
 let message;
+let gameClock;
 let pulse;
 let start;
 let count;
@@ -15,6 +16,7 @@ function setup() {
   createCanvas(500, 500);
   angleMode(DEGREES);
   message = "";
+  gameClock = "";
   pulse = [];
   start = 0;
   count = 0;
@@ -22,18 +24,16 @@ function setup() {
   flash = true;
   debug = false;
   launched = false;
-  
-  osc = new p5.Oscillator('triangle');
 }
 
 function draw() {
   background(28);
-  
+
   if (launched && (millis() - start) >= 60200) {
     drawFinal();
     return;
   }
-  
+
   if (launched && (millis() - start) >= -60000) {
     count = floor((millis() - start) / TEMPO);
     drawCount(0, 125);
@@ -43,16 +43,23 @@ function draw() {
         console.log(millis() - start);
       }
     }
-    if (count >= -8) drawBeat(0, 0);
+    if (count >= -16) drawBeat(0, 0);
     oldCount = count;
   }
-  
+
   setMessage();
   drawClock(100, -120);
   drawPulse(-135, -135);
 }
 
 function setMessage() {
+  if (launched) {
+    let t = abs(floor((millis() - start) / 1000) - 60);
+    let s = t % 60;
+    if (s < 10) s = "0" + s;
+    gameClock = "t-" + floor(t / 60) + ":" + s;
+  }
+
   if (debug) {
     drawDebug();
     message = millis() - start;
@@ -72,17 +79,33 @@ function setMessage() {
 function drawClock(x, y) {
   textFont('monospace', 64);
   textAlign(CENTER);
-  
+
+  if (launched) {
+    drawGameClock(x, y + 37);
+    y -= 37;
+  }
   if (launched && millis() - start > 0) {
     colorMode(HSB, 100);
     fill(frameCount % 100, 100, 100);
   }
   colorMode(RGB, 255);
   fill(120);
-  if (flash && (millis() - start) % 1000 < 50) fill(220);
+  if (flash && abs(millis() - start) % 1000 < 50) fill(220);
   rect((width - textWidth(message)) / 2 + x - 5, height / 2 - 54 + y, textWidth(message) + 10, 74)
   fill(220);
   text(message, width / 2 + x, height / 2 + y);
+}
+
+function drawGameClock(x, y) {
+  textFont('monospace', 64);
+  textAlign(CENTER);
+  colorMode(RGB, 255);
+
+  fill(120);
+  if (flash && abs(millis() - start) % 1000 < 50) fill(220);
+  rect((width - textWidth(gameClock)) / 2 + x - 5, height / 2 - 54 + y, textWidth(gameClock) + 10, 74)
+  fill(220);
+  text(gameClock, width / 2 + x, height / 2 + y);
 }
 
 function drawPulse(x, y) {
@@ -94,7 +117,7 @@ function drawPulse(x, y) {
   fill(220);
   if (keyIsPressed && keyCode == 32) fill(0, 220, 220);
   circle(width / 2 + x, height / 2 + y, 100);
-  
+
   let theta = (millis() - start) * 0.36;
   let pointX = 50 * cos(theta - 90);
   let pointY = 50 * sin(theta - 90);
@@ -107,9 +130,9 @@ function drawPulse(x, y) {
 function drawCount(x, y) {
   textFont('monospace', 64);
   textAlign(CENTER);
-  
+
   if (count >= 0) count++;
-  
+
   fill(120);
   rect((width - textWidth(count)) / 2 + x - 5, height / 2 - 54 + y, textWidth(count) + 10, 74)
   fill(220);
@@ -119,9 +142,33 @@ function drawCount(x, y) {
 function drawBeat(x, y) {
   textFont('monospace', 64);
   textAlign(CENTER);
-  
+
   let beat;
   switch (count) {
+    case -16:
+      beat = 1;
+      break;
+    case -15:
+      beat = 1;
+      break;
+    case -14:
+      beat = 2;
+      break;
+    case -13:
+      beat = 2;
+      break;
+    case -12:
+      beat = 1;
+      break;
+    case -11:
+      beat = 2;
+      break;
+    case -10:
+      beat = 3;
+      break;
+    case -9:
+      beat = 4;
+      break;
     case -8:
       beat = 1;
       break;
@@ -153,16 +200,16 @@ function drawBeat(x, y) {
   }
   
   if (count != oldCount) {
-    if (count != -7 && count != -5) {
+    if (count != -15 && count != -13 && count != -7 && count != -5) {
       osc.start();
-      osc.amp(0.25, 0.01);
+      osc.amp(0.25, 0);
       if (count == 173) osc.freq(880, 0.01);
-      else if (beat == 1 || count == -6) osc.freq(660, 0.01);
+      else if (beat == 1 || count == -6 || count == -14) osc.freq(660, 0.01);
       else osc.freq(440, 0.01);
       osc.amp(0, 0.1);
     }
   }
-  
+
   let cirX;
   if (beat % 2) {
     fill(220, 0, 0);
@@ -174,9 +221,9 @@ function drawBeat(x, y) {
   }
   circle(width / 2 + cirX + x, height / 2 + y, 50);
   fill(160);
-  rect((width - textWidth(beat)) / 2 + x - 5, height / 2 - 54 + y, textWidth(beat) + 10, 74)
+  rect((width - textWidth(beat)) / 2 + x - 5, height / 2 - 29 + y, textWidth(beat) + 10, 74)
   fill(255);
-  text(beat, width / 2 + x, height / 2 + y);
+  text(beat, width / 2 + x, height / 2 + y + 25);
 }
 
 function drawDebug() {
@@ -190,7 +237,7 @@ function drawDebug() {
 function drawFinal() {
   textFont('monospace', 64);
   textAlign(CENTER);
-  
+
   text("Yay?", width / 2, height / 2 - 50);
   text("Did it work?", width / 2, height / 2 + 50);
 }
@@ -232,7 +279,7 @@ function countdown() {
 
 function fixStart(x) {
   start += x * 1000;
-  return "Good Luck!"
+  return "Good Luck!";
 }
 
 function keyPressed() {
