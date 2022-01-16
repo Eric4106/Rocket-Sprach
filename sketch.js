@@ -24,6 +24,8 @@ function setup() {
   flash = true;
   debug = false;
   launched = false;
+
+  osc = new p5.Oscillator('triangle');
 }
 
 function draw() {
